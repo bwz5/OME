@@ -1,2 +1,5 @@
 # OME
-Order Matching Engine. 
+An Order Matching Engine written in C++. 
+
+# TODO: 
+
