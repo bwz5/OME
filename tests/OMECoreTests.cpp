@@ -11,4 +11,14 @@ class OrderBookTest : public testing::Test {
   ome::OrderBook ob;
 };
 
-TEST_F(OrderBookTest, TestPlaceFullyFulfilledBuy) { ASSERT_EQ(true, true); }
+TEST_F(OrderBookTest, TestOfTest) { ASSERT_EQ(true, true); }
+
+class MatchingEngineTest : public testing::Test {
+ protected:
+  void SetUp() override {}
+
+  void TearDown() override {}
+  ome::MatchingEngine me;
+};
+
+TEST_F(MatchingEngineTest, TestOfTest) { ASSERT_EQ(true, true); }
