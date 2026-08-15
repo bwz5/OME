@@ -1,13 +1,7 @@
 # OME
 An Order Matching Engine written in C++. 
 
-# TODO: 
-- Build an Order representation 
-- Tracking best (by price and time) bids/asks 
-- Adding/Canceling/Update order functionality 
-- Matching algorithm 
-
-## Implementation Plan: 
+## OrderBook Design: 
 - Two ordered maps
     - One that is monotonically increasing for asks (unfulfilled sell orders) 
     - One that is monotonically decreasing for bids (unfulfilled buy orders) 
