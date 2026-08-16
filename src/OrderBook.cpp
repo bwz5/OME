@@ -59,7 +59,8 @@ ome::OrderId ome::OrderBook::placeOrder(ome::Price _p, ome::Quantity _q,
   ome::Order order(_p, _q, _oS, currentOrderId);
   switch (_oS) {
     case ome::OrderSide::BUY:
-      for (auto& [price, list] : asks) {
+      for (auto it = asks.begin(); it != asks.end();) {
+        auto& [price, list] = *it;
         if (!order.quantity) {
           break;
         }
@@ -79,8 +80,10 @@ ome::OrderId ome::OrderBook::placeOrder(ome::Price _p, ome::Quantity _q,
             list.pop_front();
           }
         }
-        if (list.size() == 0) {
-          asks.erase(price);
+        if (list.empty()) {
+          it = asks.erase(it);
+        } else {
+          it++;
         }
       }
       // now let's check if there is still some quantity left over
@@ -92,7 +95,8 @@ ome::OrderId ome::OrderBook::placeOrder(ome::Price _p, ome::Quantity _q,
       }
       break;
     case ome::OrderSide::SELL:
-      for (auto& [price, list] : bids) {
+      for (auto it = bids.begin(); it != bids.end();) {
+        auto& [price, list] = *it;
         if (!order.quantity) {
           break;
         }
@@ -112,8 +116,10 @@ ome::OrderId ome::OrderBook::placeOrder(ome::Price _p, ome::Quantity _q,
             list.pop_front();
           }
         }
-        if (list.size() == 0) {
-          bids.erase(price);
+        if (list.empty()) {
+          it = bids.erase(it);
+        } else {
+          it++;
         }
       }
       // now let's check if there is still some quantity left over
