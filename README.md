@@ -15,13 +15,12 @@ An Order Matching Engine written in C++.
     - On cancels, we remove the node in-place 
     - No mapping for orderId means the order is cancelled/does not exist 
 
-## Testing Plan
-- Using GoogleTest
-    - Integrate into the CMake files 
+## Testing Strategy 
+- Used GoogleTest
+    - Integrated into the CMake build
     - Set up fixtures (classes) to set up testing environments for each test 
-    - Create tests before implementation, after method signatures are written 
 
-## Build Plan 
+## Build Strategy 
 - Different executables for main entry point and tests 
 - Create a shared target for the core logic that main and tests share  
 - Pull in GoogleTest via FetchContent
