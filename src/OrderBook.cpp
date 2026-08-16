@@ -10,6 +10,11 @@ std::optional<ome::OrderId> ome::OrderBook::updateOrder(ome::OrderId orderId,
   }
   auto& node = orderId_to_node[orderId];
   if (quantity < node->quantity && quantity > 0 && price == node->price) {
+    if (node->orderSide == ome::OrderSide::BUY)
+      totalBidQuantity -= (node->quantity - quantity);
+    if (node->orderSide == ome::OrderSide::SELL)
+      totalAskQuantity -= (node->quantity - quantity);
+
     node->quantity = quantity;
     return std::make_optional<ome::OrderId>(orderId);
   }

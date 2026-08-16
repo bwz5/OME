@@ -71,6 +71,54 @@ TEST_F(OrderBookTest, TestBuyWithHighQuantityImmediatelyFulfilled) {
   ASSERT_EQ(startingBid + 40, ob.getTotalBidQuantity());
 }
 
+TEST_F(OrderBookTest, TestCancelOrder) {
+  ome::Quantity startingBid = ob.getTotalBidQuantity();
+  ome::Quantity startingAsk = ob.getTotalAskQuantity();
+
+  ome::Quantity buyQuantity = static_cast<ome::Quantity>(100);
+  ome::OrderId oId = ob.placeOrder(static_cast<ome::Price>(20), buyQuantity,
+                                   ome::OrderSide::BUY);
+
+  ob.cancelOrder(oId);
+
+  ASSERT_EQ(static_cast<ome::Quantity>(0), ob.getTotalAskQuantity());
+  ASSERT_EQ(startingBid, ob.getTotalBidQuantity());
+}
+
+TEST_F(OrderBookTest, TestUpdateOrderQuantityDecrease) {
+  ome::Quantity startingBid = ob.getTotalBidQuantity();
+  ome::Quantity startingAsk = ob.getTotalAskQuantity();
+
+  ome::Quantity buyQuantity = static_cast<ome::Quantity>(100);
+  ome::OrderId oId = ob.placeOrder(static_cast<ome::Price>(20), buyQuantity,
+                                   ome::OrderSide::BUY);
+
+  // should have remaining quantity of 40, we lower here to 20
+  ob.updateOrder(oId, static_cast<ome::Quantity>(20),
+                 static_cast<ome::Price>(20));
+
+  ASSERT_EQ(static_cast<ome::Quantity>(0), ob.getTotalAskQuantity());
+  ASSERT_EQ(startingBid + static_cast<ome::Quantity>(20),
+            ob.getTotalBidQuantity());
+}
+
+TEST_F(OrderBookTest, TestUpdateOrderPrice) {
+  ome::Quantity startingBid = ob.getTotalBidQuantity();
+  ome::Quantity startingAsk = ob.getTotalAskQuantity();
+
+  ome::Quantity buyQuantity = static_cast<ome::Quantity>(100);
+  ome::OrderId oId = ob.placeOrder(static_cast<ome::Price>(5), buyQuantity,
+                                   ome::OrderSide::BUY);
+
+  ASSERT_EQ(static_cast<ome::Quantity>(startingAsk), ob.getTotalAskQuantity());
+
+  // Now we buy everything
+  ob.updateOrder(oId, static_cast<ome::Quantity>(100),
+                 static_cast<ome::Price>(20));
+
+  ASSERT_EQ(static_cast<ome::Quantity>(0), ob.getTotalAskQuantity());
+}
+
 class MatchingEngineTest : public testing::Test {
  protected:
   void SetUp() override {}
