@@ -141,3 +141,6 @@ Temporary Items
 
 # Not including CLAUDE.md. Using it to help guide me in each decision, teach advanced C++, but NEVER to give me the full answer. 
 CLAUDE.md 
+
+# Whatever this is
+.cache/

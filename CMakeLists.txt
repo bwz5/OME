@@ -11,6 +11,8 @@ project(ome
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Get all headers and sources for OME_CORE. CONFIGURE_DEPENDS makes cmake re-check at build time 
 file(GLOB OME_CORE_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 

@@ -20,12 +20,16 @@ class OrderBook {
   ome::Quantity totalBidQuantity = 0;
   ome::Quantity totalAskQuantity = 0;
 
- public:
-  OrderBook();
+  ome::OrderId currentOrderId = 1;
 
-  // Returns "true" if the update was successful, "false" otherwise
-  bool updateOrder(ome::OrderId orderId, ome::Quantity quantity,
-                   ome::Price price);
+ public:
+  OrderBook() = default;
+
+  // Returns the old orderId if only a quantity decrease, otherwise the previous
+  // order is cancelled and a new order is tracked.
+  std::optional<ome::OrderId> updateOrder(ome::OrderId orderId,
+                                          ome::Quantity quantity,
+                                          ome::Price price);
 
   // Returns "true" if the cancel was sucessful, "false" otherwise
   bool cancelOrder(ome::OrderId orderId);
