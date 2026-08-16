@@ -15,9 +15,12 @@ class MatchingEngine {
   std::unordered_map<Ticker, ome::OrderBook> ticker_to_orderBook;
 
  public:
-  // Returns "true" if the update was successful, "false" otherwise
-  bool updateOrder(const Ticker& ticker, ome::OrderId orderId,
-                   ome::Quantity quantity, ome::Price price);
+  // Returns the old orderId if only a quantity decrease, otherwise the previous
+  // order is cancelled and a new order is tracked.
+  std::optional<ome::OrderId> updateOrder(const Ticker& ticker,
+                                          ome::OrderId orderId,
+                                          ome::Quantity quantity,
+                                          ome::Price price);
 
   // Returns "true" if the cancel was sucessful, "false" otherwise
   bool cancelOrder(const Ticker& ticker, ome::OrderId orderId);

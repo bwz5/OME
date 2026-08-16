@@ -50,16 +50,16 @@ class OrderBook {
   ome::OrderId placeOrder(ome::Price _p, ome::Quantity _q, ome::OrderSide _oS);
 
   // Returns the lowest active Ask order if one exists
-  std::optional<ome::Order> getBestAsk();
+  std::optional<ome::Order> getBestAsk() const;
 
   // Returns the highest active Bid order if one exists
-  std::optional<ome::Order> getBestBid();
+  std::optional<ome::Order> getBestBid() const;
 
   // Returns the total Ask quantity arcross all active Ask orders
-  ome::Quantity getTotalAskQuantity();
+  ome::Quantity getTotalAskQuantity() const;
 
   // Returns the total Bid quantity across all active Bid orders
-  ome::Quantity getTotalBidQuantity();
+  ome::Quantity getTotalBidQuantity() const;
 };
 }  // namespace ome
 

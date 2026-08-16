@@ -120,26 +120,30 @@ ome::OrderId ome::OrderBook::placeOrder(ome::Price _p, ome::Quantity _q,
   return currentOrderId - 1;
 }
 
-std::optional<ome::Order> ome::OrderBook::getBestAsk() {
+std::optional<ome::Order> ome::OrderBook::getBestAsk() const {
   if (asks.empty()) {
     return std::nullopt;
   }
   auto it = asks.begin();
-  auto& [price, list] = *it;
+  const auto& [price, list] = *it;
 
   return std::make_optional<ome::Order>(list.front());
 }
 
-std::optional<ome::Order> ome::OrderBook::getBestBid() {
+std::optional<ome::Order> ome::OrderBook::getBestBid() const {
   if (bids.empty()) {
     return std::nullopt;
   }
   auto it = bids.begin();
-  auto& [price, list] = *it;
+  const auto& [price, list] = *it;
 
   return std::make_optional<ome::Order>(list.front());
 }
 
-ome::Quantity ome::OrderBook::getTotalAskQuantity() { return totalAskQuantity; }
+ome::Quantity ome::OrderBook::getTotalAskQuantity() const {
+  return totalAskQuantity;
+}
 
-ome::Quantity ome::OrderBook::getTotalBidQuantity() { return totalBidQuantity; }
+ome::Quantity ome::OrderBook::getTotalBidQuantity() const {
+  return totalBidQuantity;
+}
