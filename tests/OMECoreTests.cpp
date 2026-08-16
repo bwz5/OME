@@ -131,10 +131,23 @@ TEST_F(OrderBookTest, TestGetBestBid) {
 
 class MatchingEngineTest : public testing::Test {
  protected:
-  void SetUp() override {}
+  ome::MatchingEngine me;
+  void SetUp() override {
+    me.placeOrder("AAPL", static_cast<ome::Price>(10),
+                  static_cast<ome::Quantity>(20), ome::OrderSide::BUY);
+    me.placeOrder("AAPL", static_cast<ome::Price>(11),
+                  static_cast<ome::Quantity>(20), ome::OrderSide::BUY);
+    me.placeOrder("AAPL", static_cast<ome::Price>(12),
+                  static_cast<ome::Quantity>(20), ome::OrderSide::BUY);
+    me.placeOrder("AAPL", static_cast<ome::Price>(13),
+                  static_cast<ome::Quantity>(20), ome::OrderSide::SELL);
+    me.placeOrder("AAPL", static_cast<ome::Price>(14),
+                  static_cast<ome::Quantity>(20), ome::OrderSide::SELL);
+    me.placeOrder("AAPL", static_cast<ome::Price>(15),
+                  static_cast<ome::Quantity>(20), ome::OrderSide::SELL);
+  }
 
   void TearDown() override {}
-  ome::MatchingEngine me;
 };
 
 TEST_F(MatchingEngineTest, TestOfTest) { ASSERT_EQ(true, true); }
