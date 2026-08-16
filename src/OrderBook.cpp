@@ -29,34 +29,76 @@ std::optional<ome::OrderId> ome::OrderBook::updateOrder(ome::OrderId orderId,
   return newOrder;
 }
 
+template <typename Map>
+bool ome::OrderBook::eraseFromBook(Map& book, ome::Quantity& totalSideQuantity,
+                                   std::list<ome::Order>::iterator node) {
+  auto& list = book[node->price];
+  totalSideQuantity -= node->quantity;
+  list.erase(node);
+  if (!list.size()) {
+    book.erase(node->price);
+  }
+
+  orderId_to_node.erase(node->orderId);
+  return true;
+}
+
 bool ome::OrderBook::cancelOrder(ome::OrderId orderId) {
   if (orderId_to_node.find(orderId) == orderId_to_node.end()) {
     return false;
   }
-
   auto& node = orderId_to_node[orderId];
+
   switch (node->orderSide) {
-    case ome::OrderSide::BUY: {
-      auto& bidList = bids[node->price];
-      totalBidQuantity -= node->quantity;
-      bidList.erase(node);
-      if (!bidList.size()) {
-        bids.erase(node->price);
-      }
+    case ome::OrderSide::BUY:
+      eraseFromBook(bids, totalBidQuantity, node);
+      return true;
+    case ome::OrderSide::SELL:
+      eraseFromBook(asks, totalAskQuantity, node);
+      return true;
+  }
+}
+
+template <typename OpposingMap, typename LikeMap, typename Comparator>
+void ome::OrderBook::addOrderToBook(OpposingMap& opposingBook,
+                                    LikeMap& likeBook, ome::Order& order,
+                                    Comparator comp,
+                                    ome::Quantity& opposingQuantity,
+                                    ome::Quantity& likeQuantity) {
+  for (auto it = opposingBook.begin(); it != opposingBook.end();) {
+    auto& [price, list] = *it;
+    if (!order.quantity) {
       break;
     }
-    case ome::OrderSide::SELL: {
-      auto& askList = asks[node->price];
-      totalAskQuantity -= node->quantity;
-      askList.erase(node);
-      if (!askList.size()) {
-        asks.erase(node->price);
+    while (list.size() > 0) {
+      if (comp(price, order.price)) {  // we are no longer willing to transact
+        break;
       }
-      break;
+      if (order.quantity < list.front().quantity) {  // then we update front
+        list.front().quantity -= order.quantity;
+        opposingQuantity -= order.quantity;
+        order.quantity = 0;
+        break;
+      } else {  // then we pop front off of the list and continue
+        order.quantity -= list.front().quantity;
+        opposingQuantity -= list.front().quantity;
+        orderId_to_node.erase(list.front().orderId);
+        list.pop_front();
+      }
+    }
+    if (list.empty()) {
+      it = opposingBook.erase(it);
+    } else {
+      it++;
     }
   }
-  orderId_to_node.erase(orderId);
-  return true;
+  // now let's check if there is still some quantity left over
+  if (order.quantity) {
+    auto& list = likeBook[order.price];
+    auto node = list.insert(list.end(), order);
+    likeQuantity += order.quantity;
+    orderId_to_node[order.orderId] = node;
+  }
 }
 
 ome::OrderId ome::OrderBook::placeOrder(ome::Price _p, ome::Quantity _q,
@@ -64,86 +106,39 @@ ome::OrderId ome::OrderBook::placeOrder(ome::Price _p, ome::Quantity _q,
   ome::Order order(_p, _q, _oS, currentOrderId);
   switch (_oS) {
     case ome::OrderSide::BUY:
-      for (auto it = asks.begin(); it != asks.end();) {
-        auto& [price, list] = *it;
-        if (!order.quantity) {
-          break;
-        }
-        while (list.size() > 0) {
-          if (price > order.price) {  // we are no longer willing to buy
-            break;
-          }
-          if (order.quantity < list.front().quantity) {  // then we update front
-            list.front().quantity -= order.quantity;
-            totalAskQuantity -= order.quantity;
-            order.quantity = 0;
-            break;
-          } else {  // then we pop front off of the list and continue
-            order.quantity -= list.front().quantity;
-            totalAskQuantity -= list.front().quantity;
-            orderId_to_node.erase(list.front().orderId);
-            list.pop_front();
-          }
-        }
-        if (list.empty()) {
-          it = asks.erase(it);
-        } else {
-          it++;
-        }
-      }
-      // now let's check if there is still some quantity left over
-      if (order.quantity) {
-        auto& list = bids[order.price];
-        auto node = list.insert(list.end(), order);
-        totalBidQuantity += order.quantity;
-        orderId_to_node[order.orderId] = node;
-      }
+      addOrderToBook(asks, bids, order, std::greater<ome::Price>(),
+                     totalAskQuantity, totalBidQuantity);
       break;
     case ome::OrderSide::SELL:
-      for (auto it = bids.begin(); it != bids.end();) {
-        auto& [price, list] = *it;
-        if (!order.quantity) {
-          break;
-        }
-        while (list.size() > 0) {
-          if (price < order.price) {  // we are no longer willing to sell
-            break;
-          }
-          if (order.quantity < list.front().quantity) {  // then we update front
-            list.front().quantity -= order.quantity;
-            totalBidQuantity -= order.quantity;
-            order.quantity = 0;
-            break;
-          } else {  // then we pop front off of the list and continue
-            order.quantity -= list.front().quantity;
-            totalBidQuantity -= list.front().quantity;
-            orderId_to_node.erase(list.front().orderId);
-            list.pop_front();
-          }
-        }
-        if (list.empty()) {
-          it = bids.erase(it);
-        } else {
-          it++;
-        }
-      }
-      // now let's check if there is still some quantity left over
-      if (order.quantity) {
-        auto& list = asks[order.price];
-        auto node = list.insert(list.end(), order);
-        totalAskQuantity += order.quantity;
-        orderId_to_node[order.orderId] = node;
-      }
+      addOrderToBook(bids, asks, order, std::less<ome::Price>(),
+                     totalBidQuantity, totalAskQuantity);
       break;
   }
+
   // increment to next unique orderId
   currentOrderId++;
   return currentOrderId - 1;
 }
 
-std::optional<ome::Order> ome::OrderBook::getBestAsk() { return std::nullopt; }
+std::optional<ome::Order> ome::OrderBook::getBestAsk() {
+  if (asks.empty()) {
+    return std::nullopt;
+  }
+  auto it = asks.begin();
+  auto& [price, list] = *it;
 
-std::optional<ome::Order> ome::OrderBook::getBestBid() { return std::nullopt; }
+  return std::make_optional<ome::Order>(list.front());
+}
+
+std::optional<ome::Order> ome::OrderBook::getBestBid() {
+  if (bids.empty()) {
+    return std::nullopt;
+  }
+  auto it = bids.begin();
+  auto& [price, list] = *it;
+
+  return std::make_optional<ome::Order>(list.front());
+}
 
 ome::Quantity ome::OrderBook::getTotalAskQuantity() { return totalAskQuantity; }
 

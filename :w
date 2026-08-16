@@ -28,7 +28,7 @@ class OrderBook {
                      std::list<ome::Order>::iterator node);
 
   template <typename OpposingMap, typename LikeMap, typename Comparator>
-  void addOrderToBook(OpposingMap& opposingBook, LikeMap& likeBook,
+  bool addOrderToBook(OpposingMap& opposingBook, LikeMap& likeBook,
                       ome::Order& order, Comparator comp,
                       ome::Quantity& opposingQuantity,
                       ome::Quantity& likeQuantity);

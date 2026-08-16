@@ -119,6 +119,16 @@ TEST_F(OrderBookTest, TestUpdateOrderPrice) {
   ASSERT_EQ(static_cast<ome::Quantity>(0), ob.getTotalAskQuantity());
 }
 
+TEST_F(OrderBookTest, TestGetBestAsk) {
+  ome::Order bestAsk = ob.getBestAsk().value();
+  ASSERT_EQ(bestAsk.price, static_cast<ome::Price>(13));
+}
+
+TEST_F(OrderBookTest, TestGetBestBid) {
+  ome::Order bestBid = ob.getBestBid().value();
+  ASSERT_EQ(bestBid.price, static_cast<ome::Price>(12));
+}
+
 class MatchingEngineTest : public testing::Test {
  protected:
   void SetUp() override {}
