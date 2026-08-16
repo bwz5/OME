@@ -34,12 +34,12 @@ bool ome::OrderBook::eraseFromBook(Map& book, ome::Quantity& totalSideQuantity,
                                    std::list<ome::Order>::iterator node) {
   auto& list = book[node->price];
   totalSideQuantity -= node->quantity;
-  list.erase(node);
   if (!list.size()) {
     book.erase(node->price);
   }
 
   orderId_to_node.erase(node->orderId);
+  list.erase(node);
   return true;
 }
 

@@ -150,4 +150,63 @@ class MatchingEngineTest : public testing::Test {
   void TearDown() override {}
 };
 
-TEST_F(MatchingEngineTest, TestOfTest) { ASSERT_EQ(true, true); }
+TEST_F(MatchingEngineTest, TestGetBestBidAndAskForSeededTicker) {
+  ome::Order bestBid = me.getBestBid("AAPL").value();
+  ome::Order bestAsk = me.getBestAsk("AAPL").value();
+
+  ASSERT_EQ(bestBid.price, static_cast<ome::Price>(12));
+  ASSERT_EQ(bestAsk.price, static_cast<ome::Price>(13));
+}
+
+TEST_F(MatchingEngineTest, TestUnseenTickerHasNoBestBidOrAsk) {
+  ASSERT_EQ(me.getBestBid("GOOGL"), std::nullopt);
+  ASSERT_EQ(me.getBestAsk("GOOGL"), std::nullopt);
+}
+
+TEST_F(MatchingEngineTest, TestUnseenTickerHasZeroTotalQuantity) {
+  ASSERT_EQ(me.getTotalBidQuantity("GOOGL"), static_cast<ome::Quantity>(0));
+  ASSERT_EQ(me.getTotalAskQuantity("GOOGL"), static_cast<ome::Quantity>(0));
+}
+
+TEST_F(MatchingEngineTest, TestOrdersAreIsolatedPerTicker) {
+  ome::Quantity startingAAPLBid = me.getTotalBidQuantity("AAPL");
+  ome::Quantity startingAAPLAsk = me.getTotalAskQuantity("AAPL");
+
+  // A GOOGL sell aggressive enough to cross AAPL's bids if books were shared.
+  me.placeOrder("GOOGL", static_cast<ome::Price>(5),
+                static_cast<ome::Quantity>(10), ome::OrderSide::SELL);
+
+  ASSERT_EQ(startingAAPLBid, me.getTotalBidQuantity("AAPL"));
+  ASSERT_EQ(startingAAPLAsk, me.getTotalAskQuantity("AAPL"));
+  ASSERT_EQ(me.getTotalAskQuantity("GOOGL"), static_cast<ome::Quantity>(10));
+}
+
+TEST_F(MatchingEngineTest, TestPlaceOrderMatchesWithinSameTicker) {
+  ome::Quantity startingBid = me.getTotalBidQuantity("AAPL");
+
+  ome::OrderId oId = me.placeOrder("AAPL", static_cast<ome::Price>(5),
+                                   static_cast<ome::Quantity>(10),
+                                   ome::OrderSide::SELL);
+
+  ASSERT_EQ(startingBid - static_cast<ome::Quantity>(10),
+            me.getTotalBidQuantity("AAPL"));
+  ASSERT_EQ(me.updateOrder("AAPL", oId, 2, 2), std::nullopt);
+}
+
+TEST_F(MatchingEngineTest, TestCancelOrderThroughEngine) {
+  ome::Quantity startingBid = me.getTotalBidQuantity("AAPL");
+
+  ome::OrderId oId = me.placeOrder("AAPL", static_cast<ome::Price>(9),
+                                   static_cast<ome::Quantity>(15),
+                                   ome::OrderSide::BUY);
+
+  ASSERT_EQ(me.cancelOrder("AAPL", oId), true);
+  ASSERT_EQ(startingBid, me.getTotalBidQuantity("AAPL"));
+
+  // canceling the same orderId twice should fail the second time
+  ASSERT_EQ(me.cancelOrder("AAPL", oId), false);
+}
+
+TEST_F(MatchingEngineTest, TestCancelOrderOnUnseenTickerFails) {
+  ASSERT_EQ(me.cancelOrder("GOOGL", static_cast<ome::OrderId>(1)), false);
+}
