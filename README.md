@@ -1,5 +1,5 @@
 # OME
-An Order Matching Engine written in C++. 
+An Order Matching Engine written in C++. Can handle 3.45 million orders per second (verified in /apps benchmark). 
 
 ## OrderBook Design: 
 - Two ordered maps
