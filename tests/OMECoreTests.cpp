@@ -184,9 +184,9 @@ TEST_F(MatchingEngineTest, TestOrdersAreIsolatedPerTicker) {
 TEST_F(MatchingEngineTest, TestPlaceOrderMatchesWithinSameTicker) {
   ome::Quantity startingBid = me.getTotalBidQuantity("AAPL");
 
-  ome::OrderId oId = me.placeOrder("AAPL", static_cast<ome::Price>(5),
-                                   static_cast<ome::Quantity>(10),
-                                   ome::OrderSide::SELL);
+  ome::OrderId oId =
+      me.placeOrder("AAPL", static_cast<ome::Price>(5),
+                    static_cast<ome::Quantity>(10), ome::OrderSide::SELL);
 
   ASSERT_EQ(startingBid - static_cast<ome::Quantity>(10),
             me.getTotalBidQuantity("AAPL"));
@@ -196,9 +196,9 @@ TEST_F(MatchingEngineTest, TestPlaceOrderMatchesWithinSameTicker) {
 TEST_F(MatchingEngineTest, TestCancelOrderThroughEngine) {
   ome::Quantity startingBid = me.getTotalBidQuantity("AAPL");
 
-  ome::OrderId oId = me.placeOrder("AAPL", static_cast<ome::Price>(9),
-                                   static_cast<ome::Quantity>(15),
-                                   ome::OrderSide::BUY);
+  ome::OrderId oId =
+      me.placeOrder("AAPL", static_cast<ome::Price>(9),
+                    static_cast<ome::Quantity>(15), ome::OrderSide::BUY);
 
   ASSERT_EQ(me.cancelOrder("AAPL", oId), true);
   ASSERT_EQ(startingBid, me.getTotalBidQuantity("AAPL"));
