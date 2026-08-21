@@ -25,12 +25,15 @@ add_library(ome_core STATIC)
 target_sources(ome_core PRIVATE ${OME_CORE_SOURCES})
 target_include_directories(ome_core PUBLIC include)
 
-# Create the main executable 
-add_executable(ome_main)
-target_sources(ome_main PRIVATE apps/main.cpp) 
-target_link_libraries(ome_main PRIVATE ome_core) 
+# Create the main cli_test executable 
+add_executable(cli_test)
+target_sources(cli_test PRIVATE apps/cli_test.cpp) 
+target_link_libraries(cli_test PRIVATE ome_core) 
 
 # Add the tests subdirectory to create the tests executables 
 enable_testing()
 add_subdirectory(tests)
+
+# Add the server subdirectory to create the server executable
+add_subdirectory(server)
 
