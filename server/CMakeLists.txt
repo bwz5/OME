@@ -5,11 +5,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(httplib)
 
-# Create the ome_server executable 
-add_executable(ome_server)
-target_sources(ome_server PRIVATE server.cpp) 
-target_link_libraries(ome_server PRIVATE ome_core httplib::httplib) 
-
 FetchContent_Declare(
   json 
   URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
