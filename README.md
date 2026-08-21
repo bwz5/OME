@@ -1,5 +1,8 @@
 # OME
-An Order Matching Engine written in C++. Can handle 3.45 million orders per second (verified in /apps benchmark). 
+An Order Matching Engine written in C++. Can handle 3.45 million orders per second (verified in `/apps` benchmark). 
+
+## Server 
+Within `/server` you will find `server.cpp`, which runs an HTTP server that handles all APIs for the matching engine. To run the server, run `cmake -B build` followed by `cmake --build build`. You will find the `ome_server` executable within `/build/server`. 
 
 ## OrderBook Design: 
 - Two ordered maps

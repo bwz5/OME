@@ -147,3 +147,25 @@ ome::Quantity ome::OrderBook::getTotalAskQuantity() const {
 ome::Quantity ome::OrderBook::getTotalBidQuantity() const {
   return totalBidQuantity;
 }
+
+std::vector<ome::Order> ome::OrderBook::getBidSnapshot() const {
+  std::vector<ome::Order> ans;
+
+  for (const auto& [price, list] : bids) {
+    for (const auto& elem : list) {
+      ans.push_back(elem);
+    }
+  }
+  return ans;
+}
+
+std::vector<ome::Order> ome::OrderBook::getAskSnapshot() const {
+  std::vector<ome::Order> ans;
+
+  for (const auto& [price, list] : asks) {
+    for (const auto& elem : list) {
+      ans.push_back(elem);
+    }
+  }
+  return ans;
+}

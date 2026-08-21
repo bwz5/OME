@@ -41,6 +41,15 @@ class MatchingEngine {
 
   // Returns the total Bid quantity across all active Bid orders
   ome::Quantity getTotalBidQuantity(const Ticker& ticker) const;
+
+  // Returns the current snapshot of the ticker's Bid order book
+  std::vector<ome::Order> getBidSnapshot(const Ticker& ticker) const;
+
+  // Returns the current snapshot of the ticker's Ask order book
+  std::vector<ome::Order> getAskSnapshot(const Ticker& ticker) const;
+
+  // Returns if a ticker exists or not in the system
+  bool tickerExists(const Ticker& ticker) const;
 };
 }  // namespace ome
 

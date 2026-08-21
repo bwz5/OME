@@ -60,6 +60,12 @@ class OrderBook {
 
   // Returns the total Bid quantity across all active Bid orders
   ome::Quantity getTotalBidQuantity() const;
+
+  // Returns a vector of each bid order in the book
+  std::vector<ome::Order> getBidSnapshot() const;
+
+  // Returns a vector of each ask order in the book
+  std::vector<ome::Order> getAskSnapshot() const;
 };
 }  // namespace ome
 

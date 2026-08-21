@@ -58,3 +58,31 @@ ome::Quantity ome::MatchingEngine::getTotalBidQuantity(
 
   return it->second.getTotalBidQuantity();
 }
+
+std::vector<ome::Order> ome::MatchingEngine::getBidSnapshot(
+    const Ticker& ticker) const {
+  auto it = ticker_to_orderBook.find(ticker);
+  if (it == ticker_to_orderBook.end()) {
+    return {};
+  }
+
+  return it->second.getBidSnapshot();
+}
+
+std::vector<ome::Order> ome::MatchingEngine::getAskSnapshot(
+    const Ticker& ticker) const {
+  auto it = ticker_to_orderBook.find(ticker);
+  if (it == ticker_to_orderBook.end()) {
+    return {};
+  }
+
+  return it->second.getAskSnapshot();
+}
+
+bool ome::MatchingEngine::tickerExists(const Ticker& ticker) const {
+  auto it = ticker_to_orderBook.find(ticker);
+  if (it == ticker_to_orderBook.end()) {
+    return false;
+  }
+  return true;
+}
