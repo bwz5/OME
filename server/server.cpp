@@ -48,11 +48,76 @@ int main() {
              return;
            });
 
-  svr.Patch("/updateOrder/:orderId",
-            [&](const httplib::Request &req, httplib::Response &res) {});
+  svr.Patch("/updateOrder/:ticker/:order", [&](const httplib::Request &req,
+                                               httplib::Response &res) {
+    ome::Ticker ticker = req.path_params.at("ticker");
+    ome::OrderId orderId = std::stoi(req.path_params.at("order"));
+    std::string priceStr = req.get_param_value("price");
+    std::string quantityStr = req.get_param_value("quantity");
 
-  svr.Delete("/cancelOrder/:orderId",
-             [&](const httplib::Request &req, httplib::Response &res) {});
+    ome::Price price;
+    ome::Quantity quantity;
+
+    // input validation
+    if (!me.tickerExists(ticker)) {
+      res.status = 400;
+      res.set_content("Error, ticker not in system.", "text/plain");
+      return;
+    }
+
+    try {
+      price = std::stoll(priceStr);
+      quantity = std::stoll(quantityStr);
+    } catch (const std::exception &e) {
+      res.status = 400;
+      res.set_content("Error, please give a valid price/quantity",
+                      "text/plain");
+      return;
+    }
+
+    std::optional<ome::OrderId> resultId =
+        me.updateOrder(ticker, orderId, quantity, price);
+    if (resultId == std::nullopt) {
+      res.status = 400;
+      res.set_content("Error, please give a valid orderId", "text/plain");
+      return;
+    }
+
+    if (orderId == resultId) {
+      res.status = 200;
+      res.set_content("SUCCESS", "text/plain");
+      return;
+    }
+
+    res.status = 200;
+    res.set_content(
+        "SUCCESS, New Order ID: " + std::to_string(resultId.value()),
+        "text/plain");
+    return;
+  });
+
+  svr.Delete("/cancelOrder/:ticker/:order",
+             [&](const httplib::Request &req, httplib::Response &res) {
+               ome::Ticker ticker = req.path_params.at("ticker");
+               ome::OrderId orderId = std::stoi(req.path_params.at("order"));
+
+               // input validation
+               if (!me.tickerExists(ticker)) {
+                 res.status = 400;
+                 res.set_content("Error, ticker not in system.", "text/plain");
+                 return;
+               }
+
+               bool result = me.cancelOrder(ticker, orderId);
+
+               if (result) {
+                 res.status = 200;
+                 res.set_content("SUCCESS", "text/plain");
+               } else {
+                 res.status = 400;
+                 res.set_content("Error, failed to cancel order", "text/plain");
+               }
+             });
 
   svr.Get("/snapshot/:ticker",
           [&](const httplib::Request &req, httplib::Response &res) {
